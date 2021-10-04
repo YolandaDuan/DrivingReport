@@ -5,46 +5,14 @@
     </head>
     <body>
         <div id="data">
-            <input type="button" onclick="tableFromJson()" value="Show Drive Log" />
-            <p id="showData"></p>
-            <!-- <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>TimeStamp</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>Speed</th>
-                        <th>Speed_Limit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>1</td>
-                    </tr>
-                </tbody>
-            </table> -->
+            <button onclick="tableFromJson()" class="nice-button" role="button">
+                <span class="text">Show Driving Log</span>
+            </button>
+            <div id="showLog"></div>
+            <button onclick="generateReport()" class="nice-button" role="button">
+                <span class="text">Generate Driving Report</span>
+            </button>
+            <div id="showReport"></div>
         </div>
         <script src="main.js"></script>
     </body>
