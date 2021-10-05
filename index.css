@@ -83,3 +83,39 @@ table tr:last-of-type {
     min-width: 120px;
   }
 }
+
+ol {
+    list-style: none;
+    margin-top: 10px;
+    padding: 0;
+    /* Initialize the counter */
+    counter-reset: report;
+  }
+  
+ol li {
+    counter-increment: report;
+
+    margin-bottom: .5rem;
+    display: flex;
+    align-items: center;
+    color: black;
+}
+
+ol li:before {
+    content: counter(report);
+
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(77, 171, 247, 0.16);
+    color: #4c76b7;
+    padding: 1rem;
+    border-radius: 30px;
+    height: 30px;
+    width: 30px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-right: .75rem;
+    margin-left: 0;
+}
