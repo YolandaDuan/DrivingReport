@@ -34,6 +34,14 @@ table tr:last-of-type {
     border-bottom: 2px solid #4c76b7;
 }
 
+.report {
+  background-color: #bcd7ff;
+  position: relative;
+  display: inline-block;
+  margin: 25px 0;
+  padding-left: 5px;
+}
+
 .nice-button {
   align-items: center;
   background-image: linear-gradient(144deg,#AF40FF, #5B42F3 50%,#00DDEB);
@@ -119,3 +127,36 @@ ol li:before {
     margin-right: .75rem;
     margin-left: 0;
 }
+
+.warn {
+  background: linear-gradient(to bottom right, #EF4765, #FF9A5A);
+  border: 0;
+  border-radius: 12px;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  line-height: 2.0;
+  outline: transparent;
+  padding: 0 0.5rem;
+  margin-left: 10px;
+  text-align: center;
+  text-decoration: none;
+  transition: box-shadow .2s ease-in-out;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.warn:not([disabled]):focus {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+
+.warn:not([disabled]):hover {
+  box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+}
+
+

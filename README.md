@@ -12,8 +12,9 @@
 - Categorise driving records and generate a driving report. 
     - Press button to show the report. 
     - Calcutate the distance of two waypoints based on coordinate of latitude and longitude. 
-    - Read time into constant, calcutate the interval between each waypont. 
+    - Read time into constant, calcutate the interval between each waypoint. 
     - Calculate speed by distance/time-interval and compare with speed limit, categories the result. 
+    - Set a overspeed flag when speed is over speed limit. 
     - Generate final report, show how well the user (Peter Griffin) stick to the speed limits while driving. 
 - Test. 
 

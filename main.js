@@ -7,7 +7,6 @@ r.send();
 
 tableFromJson = () => {
     let wayPoints = JSON.parse(r.responseText);
-    console.log(wayPoints);
     let col = [];
 
     for (let i = 0; i < wayPoints.length; i++) {
@@ -24,7 +23,7 @@ tableFromJson = () => {
     for (let i = 0; i < col.length + 1; i++) {
         let th = document.createElement("th");
         if (i === col.length) {
-            th.innerText = "No.";
+            th.innerText = "WAYPOINT";
         } else {
             th.innerHTML = col[i].toUpperCase();
         }
@@ -47,9 +46,7 @@ tableFromJson = () => {
     }
 
     for(let i = 1; i < logTable.rows.length; i++) {
-        console.log(logTable.rows.length);
         let index = document.createTextNode(i);
-        let indexT = document.createTextNode("No.");
         logTable.rows[i].insertCell(logTable.rows[i].cells.length).append(index);   
     }
 
@@ -80,7 +77,6 @@ calculateDist = (latO, latN, lonO, lonN) => {
 
 finalCalcu = (wayPoints) => {
     let distSpeeding = 0, duraSpeeding = 0, totDistance= 0, totDuration = 0; 
-    const limit = 8.33;
     let out = "";
     for (i = 1; i < wayPoints.length; i++) {
         let tsN = new Date(wayPoints[i].timestamp);
@@ -95,31 +91,29 @@ finalCalcu = (wayPoints) => {
 
         let distanceON = calculateDist(latO, latN, lonO, lonN);
         let speed = (distanceON/interval).toFixed(2);
-        out += `<h4>Waypoint ${i} and ${i+1}</h4> 
-                    <p> Distance: ${distanceON.toFixed(2)} meters,
-                        Speed: ${speed} meters/second,
-                        Duration: ${interval} seconds.
-                        <span id="overspeed">OVERSPEED</span>
-                    </p>`;
-        if (speed > limit) {
+
+        if (speed > wayPoints[i].speed_limit) {
             distSpeeding += distanceON;
             duraSpeeding += interval;
             totDistance += distanceON;
             totDuration += interval;
+            out += `<h4>From waypoint ${i} to ${i+1} <button id="overspeed" class="warn">OVERSPEED</button> </h4>`;
 
         } else {
             totDistance += distanceON;
             totDuration += interval;
-            document.getElementById("overspeed").style.display = "none";
-        }     
+            out += `<h4>From waypoint ${i} to ${i+1} </h4>`;
+        }    
+        
+        out += `<p> Distance: ${distanceON.toFixed(2)} meters;
+                    Speed: ${speed} meters/second;
+                    Duration: ${interval} seconds.
+                </p>`;
     }
-    console.log("out is: " + out);
-    let test = document.createElement("div");
-    test.innerHTML = out; 
-    let addTest = document.getElementById("test");
-    addTest.append(test);
-    console.log("test is: " + test);
-    console.log("addTest is: " + addTest);
+
+    let calculate = document.getElementById("calculate");
+    calculate.innerHTML = out; 
+
     return [distSpeeding, duraSpeeding, totDistance, totDuration];
 }
 
@@ -131,13 +125,11 @@ generateReport = () => {
     let divShowReport = document.getElementById("showReport");
     divShowReport.innerHTML = `<h3>IN TOTAL</h3>
                                 <ol>
-                                    <li> Speeding distance equals to: &nbsp; <strong>${distSpeeding.toFixed(2)}</strong> &nbsp; meters.</li>
-                                    <li> Speeding duration equals to: &nbsp; <strong>${duraSpeeding}</strong> &nbsp; seconds.</li>
-                                    <li> Total driving distance equals to: &nbsp;<strong>${totDistance.toFixed(2)}</strong> &nbsp; meters.</li>
-                                    <li> Total driving duration equals to: &nbsp;<strong>${totDuration}</strong> &nbsp; seconds.</li>
+                                    <li> Speeding distance equals to: ${distSpeeding.toFixed(2)} meters.</li>
+                                    <li> Speeding duration equals to: ${duraSpeeding} seconds.</li>
+                                    <li> Total driving distance equals to: ${totDistance.toFixed(2)} meters.</li>
+                                    <li> Total driving duration equals to: ${totDuration} seconds.</li>
                                 </ol>`;   
-    // divShowReport.append(test);
-
 }
 
 
