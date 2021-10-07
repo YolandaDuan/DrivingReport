@@ -7,7 +7,7 @@
     - Press button to show the driving log.
     - Load waypoints data into table content.
     - Convert timestamp to human-friendly format.
-    - Add index row for table. 
+    - Add index column for table. 
     - Style the table and button. 
 - Categorise driving records and generate a driving report. 
     - Press button to show the report. 

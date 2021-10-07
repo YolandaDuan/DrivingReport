@@ -1,12 +1,16 @@
-const url = "https://raw.githubusercontent.com/Springworks/recruitment-waypoints-challenge/master/waypoints.json";
-
-let r = new XMLHttpRequest();
-r.open("GET", url, true);
-
-r.send();
-
-tableFromJson = () => {
+const fetchWaypoints = () => {
+    const url = "https://raw.githubusercontent.com/Springworks/recruitment-waypoints-challenge/master/waypoints.json";
+    let r = new XMLHttpRequest();
+    r.open("GET", url, false);
+    r.send();
     let wayPoints = JSON.parse(r.responseText);
+
+    return wayPoints;
+}
+
+const tableFromJson = () => {
+    let wayPoints = fetchWaypoints();
+    console.log(wayPoints);
     let col = [];
 
     for (let i = 0; i < wayPoints.length; i++) {
@@ -55,81 +59,98 @@ tableFromJson = () => {
     divShowLog.append(logTable);
 }
 
-calculateDist = (latO, latN, lonO, lonN) => {
-    if ((latN === latO) && (lonN === lonO)) {
-        return 0;
-    } else {
-        let radLatO = Math.PI * latO/180;
-        let radLatN = Math.PI * latN/180;
-        let theta = lonN-lonO;
-        let radTheta = Math.PI * theta/180;
-        let dist = Math.sin(radLatN) * Math.sin(radLatO) + Math.cos(radLatN) * Math.cos(radLatO) * Math.cos(radTheta);
-   
-        if (dist > 1) {
-            dist = 1;
-        }
-        dist = Math.acos(dist) * 180/Math.PI * 60 * 1.1515;
-        // return distance in meters
-        return dist * 1609.344;   
-    }
-}
-// module.exports = calculateDist;
+const calculateDist = (latO, latN, lonO, lonN) => {
+    let radLatO = Math.PI * latO/180;
+    let radLatN = Math.PI * latN/180;
+    let theta = lonN-lonO;
+    let radTheta = Math.PI * theta/180;
+    let dist = Math.sin(radLatN) * Math.sin(radLatO) + Math.cos(radLatN) * Math.cos(radLatO) * Math.cos(radTheta);
 
-finalCalcu = (wayPoints) => {
-    let distSpeeding = 0, duraSpeeding = 0, totDistance= 0, totDuration = 0; 
-    let out = "";
+    if (dist > 1) {
+        dist = 1;
+    }
+    dist = Math.acos(dist) * 180/Math.PI * 60 * 1.1515;
+    // return distance in meters
+    return dist * 1609.344;   
+}
+
+const calculateReport = (wayPoints) => {
+    const reportSummary = {
+        distSpeeding: 0, 
+        duraSpeeding: 0, 
+        totDistance: 0, 
+        totDuration: 0
+    };
+    let reportRows = [];
+
     for (i = 1; i < wayPoints.length; i++) {
         let tsN = new Date(wayPoints[i].timestamp);
         let tsO = new Date(wayPoints[i-1].timestamp);
         let interval = tsN.getSeconds() - tsO.getSeconds();
+        let reportRow = {
+            header: undefined,
+            description: undefined
+        };
 
-        const coordinateO = [wayPoints[i-1].position.latitude, wayPoints[i-1].position.longitude]
-        const coordinateN = [wayPoints[i].position.latitude, wayPoints[i].position.longitude]
-
-        const [latO, lonO] = coordinateO;
-        const [latN, lonN] = coordinateN;
+        const { latitude: latO, longitude: lonO } = wayPoints[i-1].position;
+        const { latitude: latN, longitude: lonN } = wayPoints[i].position;
 
         let distanceON = calculateDist(latO, latN, lonO, lonN);
-        let speed = (distanceON/interval).toFixed(2);
+        let speed = (distanceON/interval);
 
         if (speed > wayPoints[i].speed_limit) {
-            distSpeeding += distanceON;
-            duraSpeeding += interval;
-            totDistance += distanceON;
-            totDuration += interval;
-            out += `<h4>From waypoint ${i} to ${i+1} <button id="overspeed" class="warn">OVERSPEED</button> </h4>`;
+            reportSummary.distSpeeding += distanceON;
+            reportSummary.duraSpeeding += interval;
+            reportSummary.totDistance += distanceON;
+            reportSummary.totDuration += interval;
+            reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: true }
 
         } else {
-            totDistance += distanceON;
-            totDuration += interval;
-            out += `<h4>From waypoint ${i} to ${i+1} </h4>`;
+            reportSummary.totDistance += distanceON;
+            reportSummary.totDuration += interval;
+            reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: false }
         }    
         
-        out += `<p> Distance: ${distanceON.toFixed(2)} meters;
-                    Speed: ${speed} meters/second;
-                    Duration: ${interval} seconds.
-                </p>`;
+        reportRow.description = { distance: distanceON.toFixed(2), speed: speed.toFixed(2), duration: interval };
+        reportRows.push(reportRow);
     }
 
+    return {reportSummary, reportRows};
+}
+
+const printRows = (reportRows) => {
+    const overspeedMark = '<span id="overspeed" class="warn">OVERSPEED</span>';
+    let template = "";
+    for(row of reportRows) {
+        template += `<h4>From waypoint ${row.header.fromWaypoint} to ${row.header.toWaypoint} ${row.header.isSpeeding ? overspeedMark : null} </h4>
+                        <p> Distance: ${row.description.distance} meters;
+                            Speed: ${row.description.speed} meters/second;
+                            Duration: ${row.description.duration} seconds.
+                        </p>`;
+    }
     let calculate = document.getElementById("calculate");
-    calculate.innerHTML = out; 
-
-    return [distSpeeding, duraSpeeding, totDistance, totDuration];
+    calculate.innerHTML = template;
 }
 
-generateReport = () => {
-    let wayPoints = JSON.parse(r.responseText);
-    
-    const [distSpeeding, duraSpeeding, totDistance, totDuration] = finalCalcu(wayPoints);
-
+const printSummary = (reportSummary) => {
+    let template =  `<h3>SUMMARY</h3>
+                        <ol>
+                            <li> Speeding distance equals to: ${reportSummary.distSpeeding.toFixed(2)} meters.</li>
+                            <li> Speeding duration equals to: ${reportSummary.duraSpeeding} seconds.</li>
+                            <li> Total driving distance equals to: ${reportSummary.totDistance.toFixed(2)} meters.</li>
+                            <li> Total driving duration equals to: ${reportSummary.totDuration} seconds.</li>
+                        </ol>`;  
     let divShowReport = document.getElementById("showReport");
-    divShowReport.innerHTML = `<h3>IN TOTAL</h3>
-                                <ol>
-                                    <li> Speeding distance equals to: ${distSpeeding.toFixed(2)} meters.</li>
-                                    <li> Speeding duration equals to: ${duraSpeeding} seconds.</li>
-                                    <li> Total driving distance equals to: ${totDistance.toFixed(2)} meters.</li>
-                                    <li> Total driving duration equals to: ${totDuration} seconds.</li>
-                                </ol>`;   
+    divShowReport.innerHTML = template;                
+
 }
 
+const generateReport = () => {
+    let wayPoints = fetchWaypoints();
+    const {reportSummary, reportRows} = calculateReport(wayPoints);
 
+    printRows(reportRows); 
+    printSummary(reportSummary);
+}
+
+export default { calculateDist, calculateReport };
