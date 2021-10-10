@@ -16,7 +16,10 @@
     - Calculate speed by distance/time-interval and compare with speed limit, categories the result. 
     - Set a overspeed flag when speed is over speed limit. 
     - Generate final report, show how well the user (Peter Griffin) stick to the speed limits while driving. 
-- Test. 
+- Unit test, use [JEST](https://jestjs.io/) framework. 
+    - Test function calculateDist().
+    - Test function calculateReport().
+        - Using mocked implementation of calculateDist().
 
 3. Running this program locally 
 - 

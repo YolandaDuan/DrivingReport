@@ -1,4 +1,4 @@
-let math = require('./main');
+let Calculator = require('./main');
 
 const testPoints = [
   {
@@ -39,19 +39,108 @@ const testPoints = [
   },
 ]
 
-test('calculate the distance of two waypoints if they are same location', () => {
-  const waypoint1 = testPoints[0].position;
-  expect(math.calculateDist(waypoint1.latitude, waypoint1.latitude, waypoint1.longitude, waypoint1.longitude)).toBe(0);
+const testpoint1 = testPoints[0].position;
+const testpoint2 = testPoints[1].position;
+const waypoint1 = testPoints[2].position;
+const waypoint5 = testPoints[3].position;
+
+describe('calculate distance', () => {
+  let calculator = new Calculator();
+  it('returns something', () => {
+    expect(calculator.calculateReport(testPoints)).toBeDefined();
+  });
+
+  it('calculates the distance of two waypoints if they are same location', () => {
+    expect(calculator.calculateDist(testpoint1.latitude, testpoint1.latitude, testpoint1.longitude, testpoint1.longitude)).toBe(0);
+  });
+
+  it('calculates the distance between two different waypoints', () => {
+    expect(calculator.calculateDist(testpoint1.latitude, testpoint2.latitude, testpoint1.longitude, testpoint2.longitude)).toBeCloseTo(56.7, 1);
+  });
+
+  it('calculates the linear distance between waypoint 1 and 5 is less than the sum of distance between each point', () => {
+    expect(calculator.calculateDist(waypoint1.latitude, waypoint5.latitude, waypoint1.longitude, waypoint5.longitude)).toBeLessThan(201.12);
+  });
 });
 
-test('calculate the distance between two waypoints', () => {
-  expect(math.calculateDist(60.0004, 60.0009, 20.0001, 20.0003)).toBeCloseTo(56.7, 1);
-});
 
-test('linear distance between waypoint 1 and 5 is less than ', () => {
-  expect(math.calculateDist(59.334, 59.3323, 18.0667, 18.0666)).toBeLessThan(201.12);
-});
+// test for calculate report
+describe('calculate report', () => {
+  it('calls calculate dist number of waypoints - 1 times', () => {
+    let calculator = new Calculator();
 
-test('finalCalcu have return values', () => {
-  expect(math.calculateReport(testPoints)).toBeDefined();
+    const spy = jest.spyOn(calculator, 'calculateDist');
+    var testPointCount = testPoints.length;
+    calculator.calculateReport(testPoints);
+    expect(spy).toHaveBeenCalledTimes(testPointCount-1);
+  });
+
+  it('returns correct report rows when distance between points are 65', () => {
+    const secondMs = 1000;
+    var time1 = new Date(Date.now());
+    var time2 = new Date(time1.getTime() + 10 * secondMs);
+    var time3 = new Date(time2.getTime() + 10 * secondMs);
+    var time4 = new Date(time3.getTime() + 10 * secondMs);
+
+    var calculator = new Calculator();
+    jest.spyOn(calculator, 'calculateDist')
+      .mockImplementation(() => 0)
+      .mockImplementationOnce(() => 65)
+      .mockImplementationOnce(() => 30)
+      .mockImplementationOnce(() => 0);
+
+    let { reportRows } = calculator.calculateReport([
+      {
+        timestamp: time1.toISOString(),
+        position: {
+          latitude: 60.0004,
+          longitude: 20.0001
+        },
+        speed: 6.3889,
+        speed_limit: 5
+      },
+      {
+        timestamp: time2.toISOString(),
+        position: {
+          latitude: 60.0004,
+          longitude: 20.0001
+        },
+        speed: 6.3889,
+        speed_limit: 5
+      },
+      {
+        timestamp: time3.toISOString(),
+        position: {
+          latitude: 60.0004,
+          longitude: 20.0001
+        },
+        speed: 6.3889,
+        speed_limit: 5
+      },
+      {
+        timestamp: time4.toISOString(),
+        position: {
+          latitude: 60.0004,
+          longitude: 20.0001
+        },
+        speed: 6.3889,
+        speed_limit: 5
+      }
+    ]);
+    expect(reportRows.length).toBe(3);
+    expect(reportRows).toEqual([
+      {
+        header: { fromWaypoint: 1, toWaypoint: 2, isSpeeding: true },
+        description: { distance: "65.00", speed: "6.50", duration: 10 }
+      },
+      {
+        header: { fromWaypoint: 2, toWaypoint: 3, isSpeeding: false },
+        description: { distance: "30.00", speed: "3.00", duration: 10 }
+      },
+      {
+        header: { fromWaypoint: 3, toWaypoint: 4, isSpeeding: false },
+        description: { distance: "0.00", speed: "0.00", duration: 10 }
+      }
+    ]);
+  })
 });
