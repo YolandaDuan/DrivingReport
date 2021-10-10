@@ -59,65 +59,6 @@ const tableFromJson = () => {
     divShowLog.append(logTable);
 }
 
-const calculateDist = (latO, latN, lonO, lonN) => {
-    let radLatO = Math.PI * latO/180;
-    let radLatN = Math.PI * latN/180;
-    let theta = lonN-lonO;
-    let radTheta = Math.PI * theta/180;
-    let dist = Math.sin(radLatN) * Math.sin(radLatO) + Math.cos(radLatN) * Math.cos(radLatO) * Math.cos(radTheta);
-
-    if (dist > 1) {
-        dist = 1;
-    }
-    dist = Math.acos(dist) * 180/Math.PI * 60 * 1.1515;
-    // return distance in meters
-    return dist * 1609.344;   
-}
-
-const calculateReport = (wayPoints) => {
-    const reportSummary = {
-        distSpeeding: 0, 
-        duraSpeeding: 0, 
-        totDistance: 0, 
-        totDuration: 0
-    };
-    let reportRows = [];
-
-    for (i = 1; i < wayPoints.length; i++) {
-        let tsN = new Date(wayPoints[i].timestamp);
-        let tsO = new Date(wayPoints[i-1].timestamp);
-        let interval = tsN.getSeconds() - tsO.getSeconds();
-        let reportRow = {
-            header: undefined,
-            description: undefined
-        };
-
-        const { latitude: latO, longitude: lonO } = wayPoints[i-1].position;
-        const { latitude: latN, longitude: lonN } = wayPoints[i].position;
-
-        let distanceON = calculateDist(latO, latN, lonO, lonN);
-        let speed = (distanceON/interval);
-
-        if (speed > wayPoints[i].speed_limit) {
-            reportSummary.distSpeeding += distanceON;
-            reportSummary.duraSpeeding += interval;
-            reportSummary.totDistance += distanceON;
-            reportSummary.totDuration += interval;
-            reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: true }
-
-        } else {
-            reportSummary.totDistance += distanceON;
-            reportSummary.totDuration += interval;
-            reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: false }
-        }    
-        
-        reportRow.description = { distance: distanceON.toFixed(2), speed: speed.toFixed(2), duration: interval };
-        reportRows.push(reportRow);
-    }
-
-    return {reportSummary, reportRows};
-}
-
 const printRows = (reportRows) => {
     const overspeedMark = '<span id="overspeed" class="warn">OVERSPEED</span>';
     let template = "";
@@ -146,11 +87,73 @@ const printSummary = (reportSummary) => {
 }
 
 const generateReport = () => {
+    let calculator = new Calculator();
     let wayPoints = fetchWaypoints();
-    const {reportSummary, reportRows} = calculateReport(wayPoints);
+    const {reportSummary, reportRows} = calculator.calculateReport(wayPoints);
 
     printRows(reportRows); 
     printSummary(reportSummary);
 }
 
-export default { calculateDist, calculateReport };
+class Calculator {
+    calculateDist(latO, latN, lonO, lonN) {
+        let radLatO = Math.PI * latO/180;
+        let radLatN = Math.PI * latN/180;
+        let theta = lonN-lonO;
+        let radTheta = Math.PI * theta/180;
+        let dist = Math.sin(radLatN) * Math.sin(radLatO) + Math.cos(radLatN) * Math.cos(radLatO) * Math.cos(radTheta);
+    
+        if (dist > 1) {
+            dist = 1;
+        }
+        dist = Math.acos(dist) * 180/Math.PI * 60 * 1.1515;
+        // return distance in meters
+        return dist * 1609.344;   
+    }
+    
+    calculateReport(wayPoints) {
+        const reportSummary = {
+            distSpeeding: 0, 
+            duraSpeeding: 0, 
+            totDistance: 0, 
+            totDuration: 0
+        };
+        let reportRows = [];
+    
+        for (let i = 1; i < wayPoints.length; i++) {
+            let tsN = new Date(wayPoints[i].timestamp);
+            let tsO = new Date(wayPoints[i-1].timestamp);
+            let interval = (tsN.getTime() - tsO.getTime())/1000;
+            let reportRow = {
+                header: undefined,
+                description: undefined
+            };
+    
+            const { latitude: latO, longitude: lonO } = wayPoints[i-1].position;
+            const { latitude: latN, longitude: lonN } = wayPoints[i].position;
+    
+            let distanceON = this.calculateDist(latO, latN, lonO, lonN);
+            let speed = (distanceON/interval);
+    
+            if (speed > wayPoints[i].speed_limit) {
+                reportSummary.distSpeeding += distanceON;
+                reportSummary.duraSpeeding += interval;
+                reportSummary.totDistance += distanceON;
+                reportSummary.totDuration += interval;
+                reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: true }
+    
+            } else {
+                reportSummary.totDistance += distanceON;
+                reportSummary.totDuration += interval;
+                reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: false }
+            }    
+            
+            reportRow.description = { distance: distanceON.toFixed(2), speed: speed.toFixed(2), duration: interval };
+            reportRows.push(reportRow);
+        }
+    
+        return {reportSummary, reportRows};
+    }
+}
+
+module.exports = Calculator;
