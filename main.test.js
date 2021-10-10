@@ -44,13 +44,14 @@ const testpoint2 = testPoints[1].position;
 const waypoint1 = testPoints[2].position;
 const waypoint5 = testPoints[3].position;
 
+// test for calculate distance
 describe('calculate distance', () => {
   let calculator = new Calculator();
   it('returns something', () => {
     expect(calculator.calculateReport(testPoints)).toBeDefined();
   });
 
-  it('calculates the distance of two waypoints if they are same location', () => {
+  it('calculates the distance between two same waypoints', () => {
     expect(calculator.calculateDist(testpoint1.latitude, testpoint1.latitude, testpoint1.longitude, testpoint1.longitude)).toBe(0);
   });
 
@@ -66,30 +67,30 @@ describe('calculate distance', () => {
 
 // test for calculate report
 describe('calculate report', () => {
-  it('calls calculate dist number of waypoints - 1 times', () => {
+  it('calls function calculateDist() 3 times', () => {
     let calculator = new Calculator();
 
     const spy = jest.spyOn(calculator, 'calculateDist');
-    var testPointCount = testPoints.length;
+    let testPointCount = testPoints.length;
     calculator.calculateReport(testPoints);
     expect(spy).toHaveBeenCalledTimes(testPointCount-1);
   });
 
-  it('returns correct report rows when distance between points are 65', () => {
+  it('returns correct report rows when distance between waypoints are 65, 30, 0', () => {
     const secondMs = 1000;
-    var time1 = new Date(Date.now());
-    var time2 = new Date(time1.getTime() + 10 * secondMs);
-    var time3 = new Date(time2.getTime() + 10 * secondMs);
-    var time4 = new Date(time3.getTime() + 10 * secondMs);
+    let time1 = new Date(Date.now());
+    let time2 = new Date(time1.getTime() + 10 * secondMs);
+    let time3 = new Date(time2.getTime() + 10 * secondMs);
+    let time4 = new Date(time3.getTime() + 10 * secondMs);
 
-    var calculator = new Calculator();
+    let calculator = new Calculator();
     jest.spyOn(calculator, 'calculateDist')
       .mockImplementation(() => 0)
       .mockImplementationOnce(() => 65)
       .mockImplementationOnce(() => 30)
       .mockImplementationOnce(() => 0);
 
-    let { reportRows } = calculator.calculateReport([
+    let { reportRows, reportSummary } = calculator.calculateReport([
       {
         timestamp: time1.toISOString(),
         position: {
@@ -127,6 +128,7 @@ describe('calculate report', () => {
         speed_limit: 5
       }
     ]);
+
     expect(reportRows.length).toBe(3);
     expect(reportRows).toEqual([
       {
@@ -142,5 +144,12 @@ describe('calculate report', () => {
         description: { distance: "0.00", speed: "0.00", duration: 10 }
       }
     ]);
+
+    expect(reportSummary).toEqual({
+      distSpeeding: 65, 
+      duraSpeeding: 10, 
+      totDistance: 95, 
+      totDuration: 30
+    });
   })
 });

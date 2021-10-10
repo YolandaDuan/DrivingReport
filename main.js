@@ -1,16 +1,5 @@
-const fetchWaypoints = () => {
-    const url = "https://raw.githubusercontent.com/Springworks/recruitment-waypoints-challenge/master/waypoints.json";
-    let r = new XMLHttpRequest();
-    r.open("GET", url, false);
-    r.send();
-    let wayPoints = JSON.parse(r.responseText);
-
-    return wayPoints;
-}
-
 const tableFromJson = () => {
     let wayPoints = fetchWaypoints();
-    console.log(wayPoints);
     let col = [];
 
     for (let i = 0; i < wayPoints.length; i++) {
@@ -59,31 +48,14 @@ const tableFromJson = () => {
     divShowLog.append(logTable);
 }
 
-const printRows = (reportRows) => {
-    const overspeedMark = '<span id="overspeed" class="warn">OVERSPEED</span>';
-    let template = "";
-    for(row of reportRows) {
-        template += `<h4>From waypoint ${row.header.fromWaypoint} to ${row.header.toWaypoint} ${row.header.isSpeeding ? overspeedMark : null} </h4>
-                        <p> Distance: ${row.description.distance} meters;
-                            Speed: ${row.description.speed} meters/second;
-                            Duration: ${row.description.duration} seconds.
-                        </p>`;
-    }
-    let calculate = document.getElementById("calculate");
-    calculate.innerHTML = template;
-}
+const fetchWaypoints = () => {
+    const url = "https://raw.githubusercontent.com/Springworks/recruitment-waypoints-challenge/master/waypoints.json";
+    let r = new XMLHttpRequest();
+    r.open("GET", url, false);
+    r.send();
+    let wayPoints = JSON.parse(r.responseText);
 
-const printSummary = (reportSummary) => {
-    let template =  `<h3>SUMMARY</h3>
-                        <ol>
-                            <li> Speeding distance equals to: ${reportSummary.distSpeeding.toFixed(2)} meters.</li>
-                            <li> Speeding duration equals to: ${reportSummary.duraSpeeding} seconds.</li>
-                            <li> Total driving distance equals to: ${reportSummary.totDistance.toFixed(2)} meters.</li>
-                            <li> Total driving duration equals to: ${reportSummary.totDuration} seconds.</li>
-                        </ol>`;  
-    let divShowReport = document.getElementById("showReport");
-    divShowReport.innerHTML = template;                
-
+    return wayPoints;
 }
 
 const generateReport = () => {
@@ -112,17 +84,19 @@ class Calculator {
     }
     
     calculateReport(wayPoints) {
-        const reportSummary = {
-            distSpeeding: 0, 
-            duraSpeeding: 0, 
-            totDistance: 0, 
-            totDuration: 0
-        };
+        let reportSummary = {
+                distSpeeding: 0, 
+                duraSpeeding: 0, 
+                totDistance: 0, 
+                totDuration: 0
+                };
         let reportRows = [];
     
         for (let i = 1; i < wayPoints.length; i++) {
             let tsN = new Date(wayPoints[i].timestamp);
             let tsO = new Date(wayPoints[i-1].timestamp);
+
+            // interval in seconds
             let interval = (tsN.getTime() - tsO.getTime())/1000;
             let reportRow = {
                 header: undefined,
@@ -154,6 +128,33 @@ class Calculator {
     
         return {reportSummary, reportRows};
     }
+}
+
+const printRows = (reportRows) => {
+    const overspeedMark = '<span id="overspeed" class="warn">OVERSPEED</span>';
+    let template = "";
+    for(row of reportRows) {
+        template += `<h4>From waypoint ${row.header.fromWaypoint} to ${row.header.toWaypoint} ${row.header.isSpeeding ? overspeedMark : null} </h4>
+                        <p> Distance: ${row.description.distance} meters;
+                            Speed: ${row.description.speed} meters/second;
+                            Duration: ${row.description.duration} seconds.
+                        </p>`;
+    }
+    let calculate = document.getElementById("calculate");
+    calculate.innerHTML = template;
+}
+
+const printSummary = (reportSummary) => {
+    let template =  `<h3>SUMMARY</h3>
+                        <ol>
+                            <li> Speeding distance equals to: ${reportSummary.distSpeeding.toFixed(2)} meters.</li>
+                            <li> Speeding duration equals to: ${reportSummary.duraSpeeding} seconds.</li>
+                            <li> Total driving distance equals to: ${reportSummary.totDistance.toFixed(2)} meters.</li>
+                            <li> Total driving duration equals to: ${reportSummary.totDuration} seconds.</li>
+                        </ol>`;  
+    let divShowReport = document.getElementById("showReport");
+    divShowReport.innerHTML = template;                
+
 }
 
 module.exports = Calculator;

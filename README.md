@@ -38,3 +38,4 @@
 - [Convert JSON to Table](https://www.encodedna.com/javascript/practice-ground/default.htm?pg=convert_json_to_table_javascript).
 - [Calculate distance based on latitude and longitude](https://www.geodatasource.com/developers/javascript).
 - [Button Style](https://getcssscan.com/css-buttons-examples).
+- Jest [mock functins](https://jestjs.io/docs/mock-function-api#mockfnmockimplementationfn).
