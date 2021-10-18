@@ -1,11 +1,11 @@
 const tableFromJson = () => {
     let wayPoints = fetchWaypoints();
-    let col = [];
+    let column = [];
 
     for (let i = 0; i < wayPoints.length; i++) {
         for (let key in wayPoints[i]) {
-            if (col.indexOf(key) === -1) {
-                col.push(key);
+            if (column.indexOf(key) === -1) {
+                column.push(key);
             }
         }
     }
@@ -13,27 +13,27 @@ const tableFromJson = () => {
 
     let tr = logTable.insertRow();
 
-    for (let i = 0; i < col.length + 1; i++) {
+    for (let i = 0; i < column.length + 1; i++) {
         let th = document.createElement("th");
-        if (i === col.length) {
+        if (i === column.length) {
             th.innerText = "WAYPOINT";
         } else {
-            th.innerHTML = col[i].toUpperCase();
+            th.innerHTML = column[i].toUpperCase();
         }
         tr.append(th);
     }
 
     for (let i = 0; i < wayPoints.length; i++) {
         let tr = logTable.insertRow();
-        for (let j = 0; j < col.length; j++) {
+        for (let j = 0; j < column.length; j++) {
             let td = tr.insertCell();
-            if(j === 0) {
+            if(column[j] === "timestamp") {
                 let ts = new Date(wayPoints[i].timestamp);
                 td.innerHTML = ts.toLocaleString();
-            } else if(j === 1) {
+            } else if(column[j] === "position") {
                 td.innerHTML = wayPoints[i].position.latitude + ", " + wayPoints[1].position.longitude;
             } else {
-                td.innerHTML = wayPoints[i][col[j]];
+                td.innerHTML = wayPoints[i][column[j]];
             }  
         }
     }
@@ -50,10 +50,10 @@ const tableFromJson = () => {
 
 const fetchWaypoints = () => {
     const url = "https://raw.githubusercontent.com/Springworks/recruitment-waypoints-challenge/master/waypoints.json";
-    let r = new XMLHttpRequest();
-    r.open("GET", url, false);
-    r.send();
-    let wayPoints = JSON.parse(r.responseText);
+    let data = new XMLHttpRequest();
+    data.open("GET", url, false);
+    data.send();
+    let wayPoints = JSON.parse(data.responseText);
 
     return wayPoints;
 }
@@ -68,19 +68,19 @@ const generateReport = () => {
 }
 
 class Calculator {
-    calculateDist(latO, latN, lonO, lonN) {
-        let radLatO = Math.PI * latO/180;
-        let radLatN = Math.PI * latN/180;
-        let theta = lonN-lonO;
+    calculateDist(firstLatitude, nextLatitude, firstLongitude, nextLongitude) {
+        let radLatO = Math.PI * firstLatitude/180;
+        let radLatN = Math.PI * nextLatitude/180;
+        let theta = nextLongitude-firstLongitude;
         let radTheta = Math.PI * theta/180;
-        let dist = Math.sin(radLatN) * Math.sin(radLatO) + Math.cos(radLatN) * Math.cos(radLatO) * Math.cos(radTheta);
+        let distance = Math.sin(radLatN) * Math.sin(radLatO) + Math.cos(radLatN) * Math.cos(radLatO) * Math.cos(radTheta);
     
-        if (dist > 1) {
-            dist = 1;
+        if (distance > 1) {
+            distance = 1;
         }
-        dist = Math.acos(dist) * 180/Math.PI * 60 * 1.1515;
+        distance = Math.acos(distance) * 180/Math.PI * 60 * 1.1515;
         // return distance in meters
-        return dist * 1609.344;   
+        return distance * 1609.344;   
     }
     
     calculateReport(wayPoints) {
@@ -93,36 +93,36 @@ class Calculator {
         let reportRows = [];
     
         for (let i = 1; i < wayPoints.length; i++) {
-            let tsN = new Date(wayPoints[i].timestamp);
-            let tsO = new Date(wayPoints[i-1].timestamp);
-
+            let nextTimeStamp = new Date(wayPoints[i].timestamp);
+            let firstTimeStamp = new Date(wayPoints[i-1].timestamp);
+    
             // interval in seconds
-            let interval = (tsN.getTime() - tsO.getTime())/1000;
+            let interval = (nextTimeStamp.getTime() - firstTimeStamp.getTime())/1000;
             let reportRow = {
                 header: undefined,
                 description: undefined
             };
     
-            const { latitude: latO, longitude: lonO } = wayPoints[i-1].position;
-            const { latitude: latN, longitude: lonN } = wayPoints[i].position;
+            const { latitude: firstLatitude, longitude: firstLontitudg } = wayPoints[i-1].position;
+            const { latitude: nextLatitude, longitude: nextLongitude } = wayPoints[i].position;
     
-            let distanceON = this.calculateDist(latO, latN, lonO, lonN);
-            let speed = (distanceON/interval);
+            let distance = this.calculateDist(firstLatitude, nextLatitude, firstLontitudg, nextLongitude);
+            let averageSpeed = (distance/interval);
     
-            if (speed > wayPoints[i].speed_limit) {
-                reportSummary.distSpeeding += distanceON;
+            if (averageSpeed > wayPoints[i].speed_limit || averageSpeed > wayPoints[i-1].speed_limit) {
+                reportSummary.distSpeeding += distance;
                 reportSummary.duraSpeeding += interval;
-                reportSummary.totDistance += distanceON;
+                reportSummary.totDistance += distance;
                 reportSummary.totDuration += interval;
                 reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: true }
     
             } else {
-                reportSummary.totDistance += distanceON;
+                reportSummary.totDistance += distance;
                 reportSummary.totDuration += interval;
                 reportRow.header = { fromWaypoint: i, toWaypoint: i+1, isSpeeding: false }
             }    
             
-            reportRow.description = { distance: distanceON.toFixed(2), speed: speed.toFixed(2), duration: interval };
+            reportRow.description = { distance: distance.toFixed(2), speed: averageSpeed.toFixed(2), duration: interval };
             reportRows.push(reportRow);
         }
     

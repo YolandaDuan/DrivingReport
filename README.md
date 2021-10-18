@@ -1,8 +1,6 @@
-# SpringWorksHA
+# DrivingReport
 
-1. Requirements from [Springworks](https://github.com/Springworks/recruitment-waypoints-challenge). 
-
-2. Implementation
+1. Implementation
 - Load JSON file to a table and show it on a web page. 
     - Press button to show the driving log.
     - Load waypoints data into table content.
@@ -24,20 +22,21 @@
     - Test function calculateDist().
     - Test function calculateReport().
         - Using mocked implementation of calculateDist().
-3. Running this program locally has two ways: 
+2. Running this program locally has two ways: 
 - 
     ```
     npm install
     npm start
+    npm test
     ``` 
 - Or view index.html with [Live Server Extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) if you use VS Code.  
 
-4. Potential features.
+3. Potential features.
 - Integrate with google map API, show driving history on the map. 
 - Calculate score based on the driver's ability to drive safely, eg. how close to the speed limit, how often he drives over the speed limit. 
 - Generate driving report in csv or other format. 
 
-5. Reference
+4. Reference
 - [Convert JSON to Table](https://www.encodedna.com/javascript/practice-ground/default.htm?pg=convert_json_to_table_javascript).
 - [Calculate distance based on latitude and longitude](https://www.geodatasource.com/developers/javascript).
 - [Button Style](https://getcssscan.com/css-buttons-examples).
