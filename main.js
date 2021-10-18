@@ -49,10 +49,9 @@ const tableFromJson = () => {
 }
 
 const fetchWaypoints = () => {
-    const url = "https://raw.githubusercontent.com/Springworks/recruitment-waypoints-challenge/master/waypoints.json";
     let data = new XMLHttpRequest();
-    data.open("GET", url, false);
-    data.send();
+    data.open("GET", "./waypoints.json", false);
+    data.send(null);
     let wayPoints = JSON.parse(data.responseText);
 
     return wayPoints;
@@ -107,8 +106,13 @@ class Calculator {
             const { latitude: nextLatitude, longitude: nextLongitude } = wayPoints[i].position;
     
             let distance = this.calculateDist(firstLatitude, nextLatitude, firstLontitudg, nextLongitude);
-            let averageSpeed = (distance/interval);
-    
+            let averageSpeed;
+            if (interval === 0) {
+                averageSpeed = 0;
+            } else {
+                averageSpeed = distance/interval;
+            }
+            
             if (averageSpeed > wayPoints[i].speed_limit || averageSpeed > wayPoints[i-1].speed_limit) {
                 reportSummary.distSpeeding += distance;
                 reportSummary.duraSpeeding += interval;
