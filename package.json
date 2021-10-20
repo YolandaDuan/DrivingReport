@@ -4,19 +4,19 @@
     "start": "npm run open",
     "open": "concurrently \"http-server -a localhost -p 5000\" \"open http://localhost:5000/index.html\""
   },
-  "name": "springworksha",
+  "name": "drive-report",
   "version": "0.1.0",
   "main": "main.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YolandaDuan/SpringWorksHA.git"
+    "url": "git+https://github.com/YolandaDuan/DrivingReport"
   },
   "author": "yolanda",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/YolandaDuan/SpringWorksHA/issues"
+    "url": "https://github.com/YolandaDuan/DrivingReport/issues"
   },
-  "homepage": "https://github.com/YolandaDuan/SpringWorksHA#readme",
+  "homepage": "https://github.com/YolandaDuan/DrivingReport#readme",
   "devDependencies": {
     "concurrently": "^6.3.0",
     "http-server": "^13.0.2"
